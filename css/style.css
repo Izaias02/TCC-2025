@@ -31,3 +31,23 @@
   z-index: 1000;
   width: 250px;
 }
+#adminLoginModal .form-control {
+  border-radius: 50px !important;
+}
+
+#adminLoginModal .btn {
+  border-radius: 50px !important;
+}
+#carouselMeses {
+  max-width: 500px;
+  width: 90vw;
+  margin: 0 auto;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  transition: background-color 0.8s ease-in-out;
+}
