@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
   const form = document.getElementById('formCadastro');
   form.addEventListener('submit', function (e) {
     e.preventDefault();
-    // Aqui você pode validar os campos
+    // Aqui você pode validar os campos essa validção tem que ser feita atraves do banco de dados atraves do cpf e da senha 
+    
     window.location.href = 'index.html'; // redireciona após cadastro
   });
 

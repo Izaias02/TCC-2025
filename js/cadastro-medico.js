@@ -28,3 +28,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+// aqui temos que fazer a validação la no banco de dados para liberar o acesso atraves do crm e da senha

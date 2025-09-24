@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const senha = document.getElementById('adminSenha').value.trim().toLowerCase();
    
 
-    // aqui esta os login's e as senhas !!!
+    // aqui esta os login's e as senhas !!! depois temos que fazer atraves de uma criptografia do jeito que o marcio fez no segundo semestre 
     const validUsers = [
       { login: 'izaias salgado dos santos', senha: 'chutaobalde' },
       { login: 'vinicius pires rodrigues', senha: 'vamostropa' },
