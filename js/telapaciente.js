@@ -1,4 +1,4 @@
-/*
+
 document.addEventListener('DOMContentLoaded', function () {
    // Manipulação do botão "Importar Dados" não esta funcionando nada aqui ainda mas deixei a ideia q eu tava tendo na hora bagulho dificil kkkk
 
@@ -89,4 +89,4 @@ document.addEventListener('DOMContentLoaded', function () {
     })
     .catch(error => console.error('Erro ao marcar consulta:', error));
   }
-});*/
+});
