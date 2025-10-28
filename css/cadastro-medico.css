@@ -1,0 +1,65 @@
+.sexo-dropdown {
+  position: relative;
+  user-select: none;
+}
+.sexo-options {
+  position: absolute;
+  top: 110%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ced4da;
+  border-radius: 0.75rem;
+  box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+  z-index: 10;
+  display: none;
+}
+.sexo-option {
+  padding: 8px 15px;
+  cursor: pointer;
+  border-radius: 0.75rem;
+  transition: background-color 0.2s;
+}
+.sexo-option:hover {
+  background-color: #90DCB4;
+  color: #fff;
+}
+
+
+
+
+
+
+body {
+  min-height: 100vh;
+  background: linear-gradient(to right, #A0AC9466 40%, #90DCB499 60%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.cadastro-container {
+  background: white;
+  padding: 30px 40px;
+  border-radius: 15px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 0 15px rgb(0 0 0 / 0.1);
+}
+
+.rounded-input {
+  border-radius: 0.75rem !important;
+}
+
+footer {
+  background: #f8f9fa;
+  font-size: 0.9rem;
+  color: #555;
+}
+.sexo-options {
+  cursor: pointer;
+}
+
+.sexo-option:hover {
+  background-color: #e9ecef;
+}
