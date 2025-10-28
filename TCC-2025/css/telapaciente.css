@@ -1,0 +1,69 @@
+/* Header e footer com degradê */
+.header-bg {
+  background: linear-gradient(to right, #A0AC9466 40%, #90DCB499 60%);
+}
+
+.footer-bg {
+  background: linear-gradient(to right, #A0AC9466 40%, #90DCB499 60%);
+}
+
+/* Body e html ocupando toda a altura e fundo claro */
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f9fa;
+}
+
+/* Botões com bordas arredondadas e cor ciano */
+.btn-info {
+  border-radius: 50px !important;
+  padding: 8px 24px;
+  font-size: 1rem;
+  background-color: #17c1c8 !important; /* ciano */
+  border-color: #17c1c8 !important;
+  color: white !important;
+  transition: background-color 0.3s ease;
+}
+
+.btn-info:hover,
+.btn-info:focus {
+  background-color: #13a9b0 !important; /* ciano mais escuro */
+  border-color: #13a9b0 !important;
+  color: white !important;
+}
+
+.btn-secondary {
+  border-radius: 50px !important;
+  padding: 8px 24px;
+  font-size: 1rem;
+  background-color: #17c1c8 !important; /* ciano */
+  border-color: #17c1c8 !important;
+  color: white !important;
+  transition: background-color 0.3s ease;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+  background-color: #13a9b0 !important; /* ciano mais escuro */
+  border-color: #13a9b0 !important;
+  color: white !important;
+}
+
+/* Ajuste da largura e centralização do botão Retorno */
+#btn-retorno {
+  width: 40%;
+  align-self: center;
+}
+
+/* Card dos botões */
+.card {
+  min-height: 320px;
+}
+
+/* Opcional: ajustar padding do container para melhor espaçamento mas acho que o bootstrap ja faz isso*/
+main.container {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}

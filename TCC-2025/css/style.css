@@ -1,0 +1,63 @@
+/* Header e footer com verde escuro */
+.header-bg { background: linear-gradient(
+  to right,
+  #A0AC9466 40%,  /* Cor 1 até 40% */
+  #90DCB499 60%   /* Cor 2 começa em 40% e vai até 60% */
+);}
+
+.footer-bg { background: linear-gradient(
+  to right,
+  #A0AC9466 40%,  /* Cor 1 até 40% */
+  #90DCB499 60%   /* Cor 2 começa em 40% e vai até 60% */
+);}
+
+/* Conteúdo branco */
+.white-center {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+/* Formulário de login suspenso */
+.login-form {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 1rem;
+  z-index: 1000;
+  width: 250px;
+}
+#adminLoginModal .form-control {
+  border-radius: 50px !important;
+}
+
+#adminLoginModal .btn {
+  border-radius: 50px !important;
+}
+#carouselMeses {
+  max-width: 500px;
+  width: 90vw;
+  margin: 0 auto;
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+body {
+  transition: background-color 0.8s ease-in-out;
+}
+/* Todas as imagens dentro da pasta imgmeses que terminam em .jpg */
+img[src^="imgmeses/"][src$=".jpg"],
+.imagem-mes {
+  width: 100%;
+  height: 300px; /* ou o valor que preferir */
+  object-fit: cover; /* ou 'contain' se quiser ver a imagem inteira */
+  border-radius: 8px; /* opcional */
+  display: block;
+  margin: 0 auto;
+}
