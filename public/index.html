@@ -83,24 +83,56 @@
   <!-- SCRIPTS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/script.js"></script>
-  <script src="js/adminLogin.js"></script>  <!-- INCLUA O SCRIPT DO LOGIN DO ADMINISTRADOR -->
   <script src="js/carrossel.js"></script>
 
-  <!-- LOGIN OVERLAY JS -->
+  <!-- ADMIN LOGIN JS -->
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
+      const loginForm = document.getElementById('adminLoginForm');
+
+      loginForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const login = document.getElementById('adminLogin').value;
+        const senha = document.getElementById('adminSenha').value;
+
+        if (!login || !senha) {
+          alert('Login e senha são obrigatórios');
+          return;
+        }
+
+        try {
+          const response = await fetch('http://localhost:3000/admin/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ login, senha })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            window.location.href = '/pagina-admin';
+          } else {
+            const erroDiv = document.getElementById('adminLoginErro');
+            erroDiv.style.display = 'block';
+            erroDiv.textContent = data.message || 'Login ou senha inválidos';
+          }
+        } catch (error) {
+          console.error('Erro ao tentar fazer login:', error);
+          alert('Erro ao tentar realizar o login. Tente novamente mais tarde.');
+        }
+      });
+
+      // LOGIN OVERLAY
       const loginBtn = document.getElementById('loginBtn');
       const loginOverlay = document.getElementById('loginOverlay');
       const closeOverlay = document.getElementById('closeOverlay');
-
       const pacienteBtn = document.getElementById('pacienteBtn');
       const medicoBtn = document.getElementById('medicoBtn');
       const adminBtnOverlay = document.getElementById('adminBtnOverlay');
 
       loginBtn.addEventListener('click', () => loginOverlay.style.display = 'flex');
       closeOverlay.addEventListener('click', () => loginOverlay.style.display = 'none');
-
-      // Redirecionamentos
       pacienteBtn.addEventListener('click', () => window.location.href = 'telapaciente.html');
       medicoBtn.addEventListener('click', () => window.location.href = 'medico.html');
 

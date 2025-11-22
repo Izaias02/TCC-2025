@@ -3,9 +3,17 @@ const session = require('express-session');
 const mysql = require('mysql2/promise');
 const path = require('path');
 const bcrypt = require('bcryptjs'); // Para hash e comparação de senhas
+const cors = require('cors'); // Para permitir CORS
 
 const app = express();
 const PORT = 3000;
+
+// Configuração do CORS para permitir requisições do front-end
+app.use(cors({
+  origin: 'http://localhost:5000',  // URL do seu front-end (ajuste conforme necessário)
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type,Authorization'
+}));
 
 // Configura a sessão
 app.use(session({
@@ -41,6 +49,7 @@ app.get('/', (req, res) => {
 // Rota de login de administrador
 app.post('/admin/login', async (req, res) => {
   const { login, senha } = req.body;
+  console.log(`Requisição recebida: login = ${login}, senha = ${senha}`);  // Log para depuração
 
   // Validação de dados
   if (!login || !senha) {
@@ -50,14 +59,15 @@ app.post('/admin/login', async (req, res) => {
   try {
     const conn = await connectDB();
     
-    // Procura o administrador pelo login (não verifique a senha aqui)
+    // Procura o administrador pelo login
     const [rows] = await conn.execute('SELECT * FROM administradores WHERE login = ?', [login]);
 
     if (rows.length > 0) {
       const admin = rows[0];
-
+      
       // Compara a senha fornecida com a senha criptografada no banco usando bcrypt
       const passwordMatch = await bcrypt.compare(senha, admin.senha);
+      console.log('Senha comparada:', passwordMatch);  // Log para ver se a comparação de senha deu certo
 
       if (passwordMatch) {
         // Senha válida, cria a sessão
