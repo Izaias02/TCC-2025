@@ -14,7 +14,6 @@
   </header>
 
   <main class="container my-5">
-
     <div class="d-flex gap-3 justify-content-center mb-5 flex-wrap">
       <button onclick="window.location.href='cadastro-medico.html'" class="btn btn-outline-danger btn-lg px-4">
         Cadastro Médico
@@ -51,7 +50,7 @@
     </div>
   </footer>
 
-  <!-- Modal -->
+  <!-- Modal Resultados -->
   <div class="modal fade" id="resultadoModal" tabindex="-1" aria-labelledby="resultadoModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
@@ -68,44 +67,57 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const formPesquisa = document.getElementById('formPesquisa');
-      const modalBodyContent = document.getElementById('modalBodyContent');
-      const resultadoModal = new bootstrap.Modal(document.getElementById('resultadoModal'));
+  document.addEventListener('DOMContentLoaded', () => {
+    // Verifica se o admin está logado
+    const adminLogado = localStorage.getItem('adminLogado');
+    if (!adminLogado) {
+      alert('Acesso negado! Faça login como administrador.');
+      window.location.href = 'index.html';
+    }
 
-      formPesquisa.addEventListener('submit', (event) => {
-        event.preventDefault();
+    // Funcionalidade de pesquisa
+    const formPesquisa = document.getElementById('formPesquisa');
+    const modalBodyContent = document.getElementById('modalBodyContent');
+    const resultadoModal = new bootstrap.Modal(document.getElementById('resultadoModal'));
 
-        const cpfCrm = document.getElementById('cpfCrm').value.trim();
-        const dataConsulta = document.getElementById('dataConsulta').value;
+    formPesquisa.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const cpfCrm = document.getElementById('cpfCrm').value.trim();
+      const dataConsulta = document.getElementById('dataConsulta').value;
 
-        let resultadoHtml = '';
+      let resultadoHtml = '';
+      if (!cpfCrm) {
+        resultadoHtml = '<p class="text-danger">Por favor, insira o CPF ou CRM.</p>';
+      } else {
+        resultadoHtml = `<p><strong>CPF/CRM pesquisado:</strong> ${cpfCrm}</p>`;
+        if (dataConsulta) resultadoHtml += `<p><strong>Data selecionada:</strong> ${dataConsulta}</p>`;
+        resultadoHtml += `
+          <div class="alert alert-info">
+            <p>Consultas encontradas:</p>
+            <ul>
+              <li>Consulta 1: 10/10/2025 - Médico: Dr. Fulano</li>
+              <li>Consulta 2: 15/10/2025 - Médico: Dra. Sicrana</li>
+            </ul>
+          </div>
+        `;
+      }
 
-        if (!cpfCrm) {
-          resultadoHtml = '<p class="text-danger">Por favor, insira o CPF ou CRM.</p>';
-        } else {
-          resultadoHtml = `<p><strong>CPF/CRM pesquisado:</strong> ${cpfCrm}</p>`;
-          if (dataConsulta) {
-            resultadoHtml += `<p><strong>Data selecionada:</strong> ${dataConsulta}</p>`;
-          }
-
-          resultadoHtml += `
-            <div class="alert alert-info">
-              <p>Consultas encontradas:</p>
-              <ul>
-                <li>Consulta 1: 10/10/2025 - Médico: Dr. Fulano</li>
-                <li>Consulta 2: 15/10/2025 - Médico: Dra. Sicrana</li>
-              </ul>
-            </div>
-          `;
-        }
-
-        modalBodyContent.innerHTML = resultadoHtml;
-        resultadoModal.show();
-      });
+      modalBodyContent.innerHTML = resultadoHtml;
+      resultadoModal.show();
     });
+  });
   </script>
 
 </body>
 </html>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const admin = localStorage.getItem('adminLogado');
+  if (!admin) {
+    alert('Acesso negado! Faça login como administrador.');
+    window.location.href = 'index.html';
+  }
+});
+</script>
