@@ -72,12 +72,12 @@ app.post('/admin/login', async (req, res) => {
       if (passwordMatch) {
         // Senha válida, cria a sessão
         req.session.admin = admin; // Armazena o admin na sessão
-        res.json({ success: true, message: 'Login bem-sucedido!' });
+        res.status(200).json({ success: true, message: 'Login bem-sucedido!' });
       } else {
-        res.status(400).json({ success: false, message: 'Login ou senha inválidos' });
+        res.status(401).json({ success: false, message: 'Login ou senha inválidos' });
       }
     } else {
-      res.status(400).json({ success: false, message: 'Login ou senha inválidos' });
+      res.status(401).json({ success: false, message: 'Login ou senha inválidos' });
     }
 
     await conn.end();

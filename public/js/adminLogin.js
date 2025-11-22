@@ -24,8 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const data = await response.json();
 
-      if (data.success) {
-        // Redireciona para a página do admin
+      if (response.ok) {  // Verifica o status HTTP 200
+        // Se a resposta for ok, redireciona para a página do admin
         window.location.href = '/pagina-admin';
       } else {
         // Mostra a mensagem de erro no modal
