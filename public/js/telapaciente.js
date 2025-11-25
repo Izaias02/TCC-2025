@@ -1,92 +1,76 @@
+document.addEventListener("DOMContentLoaded", async () => {
+    const paciente = JSON.parse(localStorage.getItem("pacienteLogado"));
+    if(!paciente) return window.location.href="index.html";
 
-document.addEventListener('DOMContentLoaded', function () {
-   // Manipulação do botão "Importar Dados" não esta funcionando nada aqui ainda mas deixei a ideia q eu tava tendo na hora bagulho dificil kkkk
+    const divInfo = document.getElementById("infoPaciente");
+    const tabelaHistorico = document.getElementById("conteudoHistorico");
+    const selectEspecialidade = document.getElementById("especialidade");
+    const selectMedico = document.getElementById("medico");
+    const inputData = document.getElementById("dataRetorno");
+    const selectHorario = document.getElementById("horarioRetorno");
+    const btnSalvarRetorno = document.getElementById("btnSalvarRetorno");
 
-  document.getElementById('btn-importar').addEventListener('click', function () {
-    // Aqui você fará a importação dos dados via uma requisição AJAX  ou pensei na API  QUE O MARCIO PASSOU para o backend
-    fetch('/importar-dados', {
-      method: 'GET', // ou 'POST' dependendo da implementação do backend
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Dados importados:', data);
-      // Aqui você pode manipular a interface conforme a resposta
-    })
-    .catch(error => console.error('Erro ao importar dados:', error));
-  });
+    // Exibir dados do paciente
+    divInfo.innerHTML = `
+        <p><strong>Nome:</strong> ${paciente.nome}</p>
+        <p><strong>CPF:</strong> ${paciente.cpf}</p>
+        <p><strong>Idade:</strong> ${paciente.idade}</p>
+        <p><strong>Sexo:</strong> ${paciente.sexo}</p>
+        <p><strong>Endereço:</strong> ${paciente.endereco}</p>
+    `;
 
-  // Manipulação do botão "Retorno" que exibe o modal com as especialidades
-  document.getElementById('btn-retorno').addEventListener('click', function () {
-    // Abre o modal
-    new bootstrap.Modal(document.getElementById('modalEspecialidades')).show();
-  });
+    // Histórico consultas
+    const resConsultas = await fetch(`/pacientes/${paciente.id}/consultas`);
+    const consultas = await resConsultas.json();
+    tabelaHistorico.innerHTML = consultas.length===0 ? "<p>Nenhuma consulta registrada.</p>" :
+        consultas.map(c=>`
+            <div class="mb-2 p-2 border rounded">
+                <p><strong>Médico:</strong> ${c.medico} (${c.especialidade})</p>
+                <p><strong>Data/Horário:</strong> ${new Date(c.data_horario).toLocaleString()}</p>
+                <p><strong>Status:</strong> ${c.status}</p>
+            </div>
+        `).join("");
 
-  // Manipulação dos botões de especialidades
-  document.querySelectorAll('[id^="btn-"]').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      const especialidade = btn.innerText.trim();
-      mostrarCalendario(especialidade);
+    // Ao mudar especialidade, carregar médicos
+    selectEspecialidade.addEventListener("change", () => {
+        const esp = selectEspecialidade.value;
+        selectMedico.innerHTML="<option>Carregando...</option>";
+        fetch(`/pacientes/medicos/especialidade/${esp}`)
+            .then(r=>r.json())
+            .then(medicos=>{
+                selectMedico.innerHTML=`<option value="">Selecione...</option>`;
+                medicos.forEach(m=>selectMedico.innerHTML+=`<option value="${m.id}">${m.nome} (CRM: ${m.crm})</option>`);
+            });
     });
-  });
 
-  // Função para mostrar o calendário de horários
-  function mostrarCalendario(especialidade) {
-    const calendario = document.getElementById('calendario');
-    calendario.style.display = 'block';
-
-    // Exibir a data de seleção
-    const dataInput = document.getElementById('data');
-    dataInput.value = '';
-
-    // Gerar os horários disponíveis
-    const horariosDiv = document.getElementById('horarios');
-    horariosDiv.innerHTML = '';
-
-    let horario = 7 * 60; // Início às 7h
-    while (horario <= 17 * 60) {
-      const hora = Math.floor(horario / 60);
-      const minutos = horario % 60;
-      const horarioStr = `${hora}:${minutos < 10 ? '0' + minutos : minutos}`;
-
-      const button = document.createElement('button');
-      button.classList.add('btn', 'btn-success', 'm-2', 'rounded-pill');
-      button.textContent = horarioStr;
-
-      button.addEventListener('click', function () {
-        marcarConsulta(especialidade, horarioStr);
-      });
-
-      horariosDiv.appendChild(button);
-      horario += 20; // Incremento de 20 minutos
-    }
-  }
-
-  // Função para marcar consulta
-  function marcarConsulta(especialidade, horario) {
-    const data = document.getElementById('data').value;
-
-    if (!data) {
-      alert('Por favor, selecione uma data.');
-      return;
+    function atualizarHorarios(){
+        const medicoId = selectMedico.value;
+        const data = inputData.value;
+        if(!medicoId || !data) return;
+        fetch(`/pacientes/medico/${medicoId}/horarios/${data}`)
+            .then(r=>r.json())
+            .then(horarios=>{
+                selectHorario.innerHTML=`<option value="">Selecione...</option>`;
+                horarios.forEach(h=>selectHorario.innerHTML+=`<option value="${h}">${h}</option>`);
+            });
     }
 
-    // Enviar os dados para o backend (exemplo usando fetch)
-    fetch('/marcar-consulta', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        especialidade: especialidade,
-        horario: horario,
-        data: data,
-      }),
-    })
-    .then(response => response.json())
-    .then(data => {
-      alert('Consulta marcada com sucesso!');
-      console.log('Consulta marcada:', data);
-    })
-    .catch(error => console.error('Erro ao marcar consulta:', error));
-  }
+    selectMedico.addEventListener("change", atualizarHorarios);
+    inputData.addEventListener("change", atualizarHorarios);
+
+    btnSalvarRetorno.addEventListener("click", async ()=>{
+        const medico_id = selectMedico.value;
+        const data = inputData.value;
+        const horario = selectHorario.value;
+        if(!medico_id || !data || !horario) return alert("Preencha todos os campos!");
+
+        const res = await fetch("/pacientes/marcar-consulta", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({ paciente_id: paciente.id, medico_id, data, horario })
+        });
+        const dataRes = await res.json();
+        if(dataRes.success) alert("Consulta marcada com sucesso!");
+        else alert("Erro ao marcar consulta.");
+    });
 });

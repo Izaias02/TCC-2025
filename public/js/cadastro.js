@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  // Máscaras simples para telefone e CPF
+  // Máscaras de telefone e CPF
   const telefoneInput = document.getElementById('telefone');
   const cpfInput = document.getElementById('cpf');
 
@@ -79,17 +79,28 @@ document.addEventListener('DOMContentLoaded', function () {
         })
       });
 
+      // 🛑 EVITA O ERRO "<!DOCTYPE" — captura HTML de erro antes do JSON
+      if (!response.ok) {
+        const textoErro = await response.text();
+        console.error("Erro HTTP:", response.status, textoErro);
+        alert("Erro ao conectar com o servidor (HTTP " + response.status + ")");
+        return;
+      }
+
       const data = await response.json();
 
       if (data.success) {
         alert('Cadastro realizado com sucesso! ID: ' + data.id);
+
         form.reset();
         sexoSelecionado = null;
         btnSexo.textContent = 'Selecione o sexo';
+
         window.location.href = 'index.html';
       } else {
         alert('Erro ao cadastrar paciente: ' + (data.message || 'Verifique os dados.'));
       }
+
     } catch (err) {
       console.error(err);
       alert('Erro na comunicação com o servidor');

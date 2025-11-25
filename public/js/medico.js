@@ -1,104 +1,151 @@
+// medico.js
 
-// js/medico.js
-
-// Simulação de pacientes agendados (banco fictício)
-const agendamentosFicticios = {
-  "2025-10-28": [
-    { id: 1, nome: "João da Silva", horario: "09:00" },
-    { id: 2, nome: "Maria Oliveira", horario: "10:20" },
-    { id: 3, nome: "Pedro Santos", horario: "14:40" }
-  ],
-  "2025-10-29": [
-    { id: 4, nome: "Ana Costa", horario: "08:40" },
-    { id: 5, nome: "Rafael Souza", horario: "11:00" }
-  ]
-};
-
-// Função para listar pacientes agendados
-function listarPacientes(dataSelecionada) {
+// Função para listar pacientes agendados a partir da API
+async function listarPacientes(dataSelecionada) {
   const listaContainer = document.getElementById("listaPacientes");
   listaContainer.innerHTML = "<p>Carregando...</p>";
 
-  setTimeout(() => {
-    const pacientes = agendamentosFicticios[dataSelecionada] || [];
+  try {
+    // Busca pacientes do backend
+    const response = await fetch(`/api/agendamentos?data=${encodeURIComponent(dataSelecionada)}`, {
+      credentials: "include" // importante para enviar cookies da sessão
+    });
 
-    if (pacientes.length === 0) {
+    if (!response.ok) throw new Error("Erro ao buscar agendamentos");
+
+    const agendamentos = await response.json();
+
+    if (!agendamentos || agendamentos.length === 0) {
       listaContainer.innerHTML = "<p class='text-muted'>Nenhum paciente agendado para esta data.</p>";
       return;
     }
 
-    const lista = pacientes.map(p => `
+    // Monta a lista de agendamentos
+    listaContainer.innerHTML = agendamentos.map(a => `
       <div class="border-bottom py-2 d-flex justify-content-between align-items-center">
         <div>
-          <strong>${p.nome}</strong><br>
-          <small>Horário: ${p.horario}</small>
+          <strong>${a.nome}</strong><br>
+          <small>Horário: ${a.horario}</small>
         </div>
-        <button class="btn btn-primary btn-sm rounded-pill" onclick="abrirRelatorio(${p.id}, '${p.nome}')">
+        <button class="btn btn-primary btn-sm rounded-pill" onclick="abrirRelatorio(${a.id}, '${a.nome.replace(/'/g, "\\'")}')">
           Atender
         </button>
       </div>
     `).join("");
 
-    listaContainer.innerHTML = lista;
-  }, 500);
+  } catch (error) {
+    console.error(error);
+    listaContainer.innerHTML = "<p class='text-danger'>Não foi possível carregar os agendamentos.</p>";
+  }
 }
 
 // Abre o modal de relatório médico
 function abrirRelatorio(idPaciente, nomePaciente) {
-  const inputNome = document.getElementById("nomePaciente");
-  inputNome.value = nomePaciente;
+  document.getElementById("nomePaciente").value = nomePaciente;
+  document.getElementById("formRelatorio").dataset.pacienteId = idPaciente;
 
   const modalRelatorio = new bootstrap.Modal(document.getElementById("modalRelatorio"));
   modalRelatorio.show();
 }
 
-// Simula o salvamento do relatório no banco
-function salvarRelatorio() {
+// Salvar relatório médico no banco
+async function salvarRelatorio() {
   const nome = document.getElementById("nomePaciente").value;
   const exames = document.getElementById("pedidosExames").value;
   const relatorio = document.getElementById("textoRelatorio").value;
+  const pacienteId = document.getElementById("formRelatorio").dataset.pacienteId;
 
   if (!nome || !relatorio) {
     alert("Por favor, preencha o relatório antes de salvar.");
     return;
   }
 
-  const dados = { nome, exames, relatorio };
-  console.log("Relatório salvo (simulado):", dados);
+  try {
+    const response = await fetch("/api/relatorios", {
+      method: "POST",
+      credentials: "include", // envia cookies da sessão
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pacienteId, nome, exames, relatorio })
+    });
 
-  alert(`Relatório salvo com sucesso para ${nome}!`);
+    const result = await response.json();
 
-  // Fecha o modal
-  const modal = bootstrap.Modal.getInstance(document.getElementById("modalRelatorio"));
-  modal.hide();
+    if (!result.success) throw new Error(result.message || "Erro ao salvar relatório");
 
-  // Limpa o formulário
-  document.getElementById("formRelatorio").reset();
+    alert(`Relatório salvo com sucesso para ${nome}!`);
+
+    // Fecha modal e limpa formulário
+    const modal = bootstrap.Modal.getInstance(document.getElementById("modalRelatorio"));
+    modal.hide();
+    document.getElementById("formRelatorio").reset();
+
+  } catch (error) {
+    console.error(error);
+    alert("Não foi possível salvar o relatório.");
+  }
+}
+
+// Função para realizar login do médico
+async function loginMedico(event) {
+  event.preventDefault();
+  const login = document.getElementById("loginEmailCRM").value;
+  const senha = document.getElementById("loginSenha").value;
+
+  try {
+    const response = await fetch("/login", {
+      method: "POST",
+      credentials: "include", // envia cookies da sessão
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ login, senha })
+    });
+
+    const result = await response.json();
+
+    if (!result.success) {
+      alert(result.message || "Erro no login");
+      return;
+    }
+
+    alert(`Bem-vindo, ${result.medico.nome}!`);
+    // Aqui você pode redirecionar ou atualizar a UI
+    window.location.reload();
+
+  } catch (err) {
+    console.error(err);
+    alert("Erro no login do médico.");
+  }
+}
+
+// Função para logout
+async function logoutMedico() {
+  try {
+    const response = await fetch("/logout", { credentials: "include" });
+    const result = await response.json();
+    if (result.success) window.location.reload();
+  } catch (err) {
+    console.error(err);
+    alert("Erro ao fazer logout.");
+  }
 }
 
 // Eventos principais
 document.addEventListener("DOMContentLoaded", () => {
   const btnVerAgendamentos = document.getElementById("btnVerAgendamentos");
   const btnSalvarRelatorio = document.getElementById("btnSalvarRelatorio");
+  const formLogin = document.getElementById("formLogin");
+  const btnLogout = document.getElementById("btnLogout");
 
-  // Ver agendamentos
-  if (btnVerAgendamentos) {
-    btnVerAgendamentos.addEventListener("click", () => {
-      const dataSelecionada = document.getElementById("dataConsulta").value;
+  btnVerAgendamentos?.addEventListener("click", () => {
+    const dataSelecionada = document.getElementById("dataConsulta").value;
+    if (!dataSelecionada) return alert("Por favor, selecione uma data.");
+    listarPacientes(dataSelecionada);
 
-      if (!dataSelecionada) {
-        alert("Por favor, selecione uma data.");
-        return;
-      }
+    const modalPacientes = new bootstrap.Modal(document.getElementById("modalPacientes"));
+    modalPacientes.show();
+  });
 
-      listarPacientes(dataSelecionada);
-      const modalPacientes = new bootstrap.Modal(document.getElementById("modalPacientes"));
-      modalPacientes.show();
-    });
-  }
+  btnSalvarRelatorio?.addEventListener("click", salvarRelatorio);
 
-  // Salvar relatório
-  if (btnSalvarRelatorio) {
-    btnSalvarRelatorio.addEventListener("click", salvarRelatorio);
-  }
+  formLogin?.addEventListener("submit", loginMedico);
+  btnLogout?.addEventListener("click", logoutMedico);
 });
