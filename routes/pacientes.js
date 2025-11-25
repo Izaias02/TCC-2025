@@ -1,37 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
-
-// Retornar todos os pacientes
-router.get('/', (req, res) => {
-    db.query('SELECT * FROM pacientes', (err, results) => {
-        if (err) return res.status(500).json({ error: err });
-        res.json(results);
-    });
-});
-
-// Cadastrar novo paciente
-router.post('/cadastro', (req, res) => {
-    const { nome, email, cpf, senha } = req.body;
-    const query = 'INSERT INTO pacientes (nome, email, cpf, senha) VALUES (?, ?, ?, ?)';
-    db.query(query, [nome, email, cpf, senha], (err, result) => {
-        if (err) return res.status(500).json({ error: err });
-        res.json({ success: true, id: result.insertId });
-    });
-});
+const bcrypt = require('bcryptjs');
 
 // Login paciente
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
     const { email, senha } = req.body;
-    const query = 'SELECT * FROM pacientes WHERE (email = ? OR cpf = ?) AND senha = ? LIMIT 1';
-    db.query(query, [email, email, senha], (err, results) => {
-        if (err) return res.status(500).json({ error: err });
-        if (results.length > 0) {
-            res.json({ success: true, paciente: results[0] });
-        } else {
-            res.json({ success: false });
+
+    try {
+        // Buscar paciente pelo email ou CPF
+        const query = 'SELECT * FROM pacientes WHERE email = ? OR cpf = ? LIMIT 1';
+        const [results] = await db.query(query, [email, email]);
+
+        if (results.length === 0) {
+            return res.json({ success: false, message: 'Paciente não encontrado' });
         }
-    });
+
+        const paciente = results[0];
+
+        // Comparar a senha usando bcrypt
+        const senhaCorreta = await bcrypt.compare(senha, paciente.senha);
+        if (!senhaCorreta) {
+            return res.json({ success: false, message: 'Senha incorreta' });
+        }
+
+        // Retornar sucesso e dados do paciente (sem a senha!)
+        const { senha: _, ...pacienteSemSenha } = paciente;
+        res.json({ success: true, paciente: pacienteSemSenha });
+        
+    } catch (err) {
+        console.error('Erro login paciente:', err);
+        res.status(500).json({ success: false, message: 'Erro no servidor' });
+    }
 });
 
 module.exports = router;

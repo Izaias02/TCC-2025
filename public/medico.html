@@ -29,6 +29,45 @@
   </style>
 </head>
 <body class="d-flex flex-column min-vh-100">
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  /**
+   * Função para verificar sessão
+   * @param {"admin"|"paciente"|"medico"} tipoUsuario
+   * @param {string} redirectUrl - Página de login/redirecionamento se não estiver logado
+   */
+  function verificarSessao(tipoUsuario, redirectUrl) {
+    let usuarioLogado = null;
+
+    switch (tipoUsuario) {
+      case "admin":
+        usuarioLogado = localStorage.getItem("adminLogado");
+        break;
+      case "paciente":
+        usuarioLogado = localStorage.getItem("pacienteLogado");
+        break;
+      case "medico":
+        usuarioLogado = localStorage.getItem("medicoLogado");
+        break;
+    }
+
+    if (!usuarioLogado) {
+      alert("Acesso negado! Faça login como " + tipoUsuario + ".");
+      window.location.href = redirectUrl;
+    }
+  }
+
+  // Exemplo de uso:
+  // Para página de administrador
+  verificarSessao("admin", "index.html");
+
+  // Para página de paciente
+  // verificarSessao("paciente", "index.html");
+
+  // Para página de médico
+  // verificarSessao("medico", "index.html");
+});
+</script>
 
   <!-- CABEÇALHO -->
   <header class="d-flex justify-content-between align-items-center px-4 py-3 header-bg text-white">

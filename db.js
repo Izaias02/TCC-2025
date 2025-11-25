@@ -1,18 +1,15 @@
 const mysql = require('mysql2');
 
-const db = mysql.createConnection({
+const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'piramidal15',
-    database: 'agenda_tcc' // ou 'agenda_medica', escolha apenas um
+    database: 'agenda_medica',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 });
 
-db.connect(err => {
-    if (err) {
-        console.error('Erro ao conectar ao banco de dados:', err);
-    } else {
-        console.log('Conectado ao banco de dados MySQL!');
-    }
-});
+const promisePool = pool.promise();
 
-module.exports = db;
+module.exports = promisePool;

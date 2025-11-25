@@ -1,50 +1,49 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("../db");
+const db = require('../db'); // seu módulo de conexão MySQL
+const bcrypt = require('bcryptjs');
 
-// Retornar todos os médicos
-router.get("/", async (req, res) => {
+// Cadastro de médico
+router.post('/cadastro', async (req, res) => {
+  const {
+    nome,
+    email,
+    senha,
+    crm,
+    especialidade,
+    telefone,
+    idade,
+    sexo,
+    nome_unidade,
+    localidade_unidade
+  } = req.body;
+
   try {
-    const [rows] = await db.query("SELECT id, nome, crm, especialidade FROM medicos");
-    res.json(rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    // Verifica se o médico já existe pelo email ou CRM
+    const [existente] = await db.query(
+      'SELECT * FROM medicos WHERE email = ? OR crm = ? LIMIT 1',
+      [email, crm]
+    );
 
-// Cadastrar novo médico
-router.post("/cadastro", async (req, res) => {
-  try {
-    const { nome, crm, senha, especialidade } = req.body;
+    if (existente.length > 0) {
+      return res.json({ success: false, message: 'Médico já cadastrado' });
+    }
 
+    // Criptografa a senha
+    const hashSenha = await bcrypt.hash(senha, 10);
+
+    // Insere no banco
     const [result] = await db.query(
-      "INSERT INTO medicos (nome, crm, senha, especialidade) VALUES (?, ?, ?, ?)",
-      [nome, crm, senha, especialidade]
+      `INSERT INTO medicos 
+      (nome, email, senha, crm, especialidade, telefone, idade, sexo, nome_unidade, localidade_unidade) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nome, email, hashSenha, crm, especialidade, telefone, idade, sexo, nome_unidade, localidade_unidade]
     );
 
     res.json({ success: true, id: result.insertId });
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Login médico
-router.post("/login", async (req, res) => {
-  try {
-    const { crm, senha } = req.body;
-
-    const [results] = await db.query(
-      "SELECT id, nome, crm, especialidade FROM medicos WHERE crm = ? AND senha = ? LIMIT 1",
-      [crm, senha]
-    );
-
-    if (results.length > 0) {
-      res.json({ success: true, medico: results[0] });
-    } else {
-      res.json({ success: false, message: "CRM ou senha inválidos" });
-    }
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Erro ao cadastrar médico:', err);
+    res.status(500).json({ success: false, message: 'Erro no servidor' });
   }
 });
 

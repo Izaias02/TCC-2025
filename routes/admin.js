@@ -1,41 +1,55 @@
 const express = require('express');
 const router = express.Router();
-const db = require('../db');
-const bcrypt = require('bcryptjs'); // Importando bcrypt para comparar as senhas
+const bcrypt = require('bcryptjs');
+const pool = require('../db');
 
-// Login administrador
+// Login admin
 router.post('/login', async (req, res) => {
-  const { login, senha } = req.body;
+    const { login, senha } = req.body;
 
-  try {
-    // Primeiro, procuramos o administrador pelo login
-    const [results] = await db.query(
-      'SELECT * FROM administradores WHERE login = ? LIMIT 1',
-      [login]
-    );
+    try {
+        // Consulta o administrador pelo login
+        const [rows] = await pool.query(
+            'SELECT * FROM administradores WHERE login = ?',
+            [login]
+        );
 
-    // Verificamos se encontramos o administrador
-    if (results.length > 0) {
-      const admin = results[0];
+        if (rows.length === 0) {
+            return res.json({ success: false, message: 'Login ou senha inválidos' });
+        }
 
-      // Agora, comparamos a senha fornecida com o hash armazenado no banco
-      const isPasswordValid = await bcrypt.compare(senha, admin.senha);
-      
-      if (isPasswordValid) {
-        // Se a senha for válida, retornamos a resposta com o admin
-        res.json({ success: true, admin: admin });
-      } else {
-        // Senha inválida
-        res.json({ success: false, message: 'Login ou senha inválidos' });
-      }
-    } else {
-      // Login não encontrado
-      res.json({ success: false, message: 'Login ou senha inválidos' });
+        const admin = rows[0];
+        const senhaCorreta = await bcrypt.compare(senha, admin.senha);
+
+        if (!senhaCorreta) {
+            return res.json({ success: false, message: 'Login ou senha inválidos' });
+        }
+
+        // Cria sessão do admin
+        req.session.adminId = admin.id;
+        req.session.adminLogin = admin.login;
+        console.log('Sessão criada:', req.session); // log de depuração
+
+        res.json({ success: true });
+
+    } catch (err) {
+        console.error('Erro no login admin:', err);
+        res.status(500).json({ success: false, message: 'Erro no servidor' });
     }
-  } catch (err) {
-    console.error('Erro ao tentar realizar login:', err);
-    res.status(500).json({ success: false, message: 'Erro no servidor' });
-  }
+});
+
+// Logout admin
+router.post('/logout', (req, res) => {
+    req.session.destroy(err => {
+        if (err) {
+            console.error('Erro ao destruir sessão:', err);
+            return res.status(500).json({ success: false, message: 'Erro ao fazer logout' });
+        }
+
+        // Limpa cookie
+        res.clearCookie('connect.sid', { path: '/' });
+        res.json({ success: true });
+    });
 });
 
 module.exports = router;

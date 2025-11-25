@@ -4,70 +4,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cadastro</title>
+  <title>Cadastro de Médico</title>
   <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <!-- CSS personalizado -->
   <link rel="stylesheet" href="css/cadastro.css" />
+  <style>
+    .sexo-dropdown {
+      position: relative;
+      user-select: none;
+    }
+
+    .sexo-options {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      right: 0;
+      background: #fff;
+      border: 1px solid #ced4da;
+      border-radius: 0.75rem;
+      box-shadow: 0 0 6px rgb(0 0 0 / 0.1);
+      z-index: 10;
+      display: none;
+    }
+
+    .sexo-option {
+      padding: 8px 15px;
+      cursor: pointer;
+      border-radius: 0.75rem;
+      transition: background-color 0.2s;
+    }
+
+    .sexo-option:hover {
+      background-color: #90DCB4;
+      color: #fff;
+    }
+  </style>
 </head>
 
-<body>
-
+<body id="bodyBackground">
   <div class="container py-5">
     <div class="cadastro-container mx-auto" style="max-width: 500px;">
-      <h2 class="mb-4 text-center">Cadastro</h2>
-      <form id="formCadastro">
+      <h2 class="mb-4 text-center">Cadastro de Médico</h2>
+
+      <form id="formCadastroMedico">
         <div class="mb-3">
-          <label for="nomeCompleto" class="form-label">Nome Completo</label>
-          <input type="text" class="form-control rounded-input" id="nomeCompleto" required />
+          <label for="nome" class="form-label">Nome Completo</label>
+          <input type="text" class="form-control rounded-input" id="nome" placeholder="Seu nome completo" required />
         </div>
+
         <div class="mb-3">
           <label for="email" class="form-label">Email</label>
-          <input type="email" class="form-control rounded-input" id="email" required />
+          <input type="email" class="form-control rounded-input" id="email" placeholder="exemplo@dominio.com" required />
         </div>
+
         <div class="mb-3">
           <label for="confirmEmail" class="form-label">Confirmação de Email</label>
-          <input type="email" class="form-control rounded-input" id="confirmEmail" required />
+          <input type="email" class="form-control rounded-input" id="confirmEmail" placeholder="Confirme seu email" required />
         </div>
+
         <div class="mb-3">
           <label for="senha" class="form-label">Crie sua Senha</label>
-          <input type="password" class="form-control rounded-input" id="senha" required />
+          <input type="password" class="form-control rounded-input" id="senha" placeholder="Senha" required />
         </div>
+
         <div class="mb-3">
           <label for="confirmSenha" class="form-label">Confirme sua Senha</label>
-          <input type="password" class="form-control rounded-input" id="confirmSenha" required />
-        </div>
-        
-
-        <div class="mb-3">
-          <label for="nomeUnidade" class="form-label">Nome da Unidade de Saúde</label>
-          <input type="text" class="form-control rounded-input" id="nomeUnidade" required />
-        </div>
-
-        <div class="mb-3">
-          <label for="localidadeUnidade" class="form-label">Localidade da Unidade de Saúde</label>
-          <input type="text" class="form-control rounded-input" id="localidadeUnidade" required />
+          <input type="password" class="form-control rounded-input" id="confirmSenha" placeholder="Confirme sua senha" required />
         </div>
 
         <div class="mb-3">
           <label for="crm" class="form-label">CRM</label>
-          <input type="text" class="form-control rounded-input" id="crm" required />
+          <input type="text" class="form-control rounded-input" id="crm" placeholder="CRM" required />
         </div>
 
         <div class="mb-3">
           <label for="especialidade" class="form-label">Especialidade Médica</label>
-          <input type="text" class="form-control rounded-input" id="especialidade" required />
+          <input type="text" class="form-control rounded-input" id="especialidade" placeholder="Ex: Cardiologia" required />
         </div>
 
         <div class="mb-3">
           <label for="telefone" class="form-label">Telefone</label>
-          <input type="tel" class="form-control rounded-input" id="telefone" required />
+          <input type="tel" class="form-control rounded-input" id="telefone" placeholder="(00) 00000-0000" required />
         </div>
+
         <div class="mb-3">
           <label for="idade" class="form-label">Idade</label>
-          <input type="number" min="0" class="form-control rounded-input" id="idade" required />
+          <input type="number" min="0" class="form-control rounded-input" id="idade" placeholder="Idade" required />
         </div>
-        <div class="mb-3 sexo-dropdown position-relative">
+
+        <div class="mb-3 sexo-dropdown">
           <label class="form-label d-block">Sexo</label>
           <button type="button" id="btnSexo" class="btn btn-outline-success rounded-input w-100 text-start">
             Selecione o sexo
@@ -77,32 +103,33 @@
             <div class="sexo-option" data-value="Feminino">Feminino</div>
           </div>
         </div>
+
+        <div class="mb-3">
+          <label for="nomeUnidade" class="form-label">Nome da Unidade de Saúde</label>
+          <input type="text" class="form-control rounded-input" id="nomeUnidade" placeholder="Ex: UBS Centro" required />
+        </div>
+
+        <div class="mb-3">
+          <label for="localidadeUnidade" class="form-label">Localidade da Unidade de Saúde</label>
+          <input type="text" class="form-control rounded-input" id="localidadeUnidade" placeholder="Cidade" required />
+        </div>
+
         <div class="mb-3 form-check">
           <input type="checkbox" class="form-check-input rounded-input" id="termos" required />
           <label class="form-check-label" for="termos">Aceito os termos de uso</label>
         </div>
 
-        <!-- este botão redireciona para a pagina inicial mas não fiz a função de salvar no banco de dados. -->
-        <button class="btn btn-success rounded-input w-100" onclick="window.location.href='index.html'">Concluir
-          Cadastro</button>
-
+        <button type="submit" class="btn btn-success rounded-input w-100">Concluir Cadastro</button>
       </form>
     </div>
   </div>
-  <div class="container py-5">
-    <!-- Rodapé -->
-    <footer class="text-center py-3 bg-light">
-      <p class="mb-0">Centro Paula Souza / ETEC Antonio Furlan / TCC-2025</p>
-    </footer>
-  </div>
+
+  <footer class="text-center py-3 bg-light">
+    <p class="mb-0">Centro Paula Souza / ETEC Antonio Furlan / TCC-2025</p>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
-  <!-- JS personalizado -->
-  <script src="js/cadastro.js"></script>
-  <script src="js/script.js"></script>
-  <script src="js/entrar.js"></script>
-  <script src="js/adminLogin.js"></script>
+  <script src="js/cadastroMedico.js"></script>
 </body>
 
 </html>
