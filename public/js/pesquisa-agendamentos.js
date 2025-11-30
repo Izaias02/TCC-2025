@@ -1,38 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
   const formPesquisa = document.getElementById('formPesquisa');
   const modalBodyContent = document.getElementById('modalBodyContent');
-  const resultadoModalEl = document.getElementById('resultadoModal');
-
-  if (!formPesquisa || !modalBodyContent || !resultadoModalEl) {
-    console.error('Erro: Elementos do DOM não encontrados!');
-    return;
-  }
-
-  const resultadoModal = new bootstrap.Modal(resultadoModalEl);
+  const resultadoModal = new bootstrap.Modal(document.getElementById('resultadoModal'));
 
   formPesquisa.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    const crm = document.getElementById('cpfCrm').value.trim(); // CRM do médico
-    const dataConsulta = document.getElementById('dataConsulta').value; // Data opcional
+    let cpfCrm = document.getElementById('cpfCrm').value.trim();
+    const dataConsulta = document.getElementById('dataConsulta').value;
 
-    if (!crm) {
-      modalBodyContent.innerHTML = '<p class="text-danger">Por favor, insira o CRM do médico.</p>';
+    if (!cpfCrm) {
+      modalBodyContent.innerHTML = '<p class="text-danger">Por favor, insira CPF ou CRM.</p>';
       resultadoModal.show();
       return;
     }
 
+    // Remove formatação do CPF (apenas números)
+    cpfCrm = cpfCrm.replace(/\D/g, '');
+
     try {
-      // Chamada ao back-end
       const url = new URL('/admin/consultas', window.location.origin);
-      url.searchParams.append('crm', crm);
+
+      // Detectar se é CPF ou CRM pelo tamanho (CPF tem 11 dígitos)
+      if (cpfCrm.length === 11) {
+        url.searchParams.append('cpf', cpfCrm);
+      } else {
+        url.searchParams.append('crm', cpfCrm);
+      }
+
       if (dataConsulta) url.searchParams.append('data', dataConsulta);
 
-      const res = await fetch(url, {
-        method: 'GET',
-        credentials: 'include' // importante para enviar cookies de sessão
-      });
-
+      const res = await fetch(url, { method: 'GET', credentials: 'include' });
       const data = await res.json();
 
       if (!data.success) {
@@ -48,11 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
 
-      // Montar HTML das consultas
-      let resultadoHtml = `<p><strong>CRM pesquisado:</strong> ${crm}</p>`;
+      // Monta o HTML dos resultados
+      let resultadoHtml = `<p><strong>Pesquisa:</strong> ${cpfCrm}</p>`;
       if (dataConsulta) resultadoHtml += `<p><strong>Data selecionada:</strong> ${dataConsulta}</p>`;
-
       resultadoHtml += '<div class="list-group mt-3">';
+
       consultas.forEach(c => {
         const dataHora = new Date(c.data_horario).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
         resultadoHtml += `
@@ -64,8 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
           </div>
         `;
       });
-      resultadoHtml += '</div>';
 
+      resultadoHtml += '</div>';
       modalBodyContent.innerHTML = resultadoHtml;
       resultadoModal.show();
 

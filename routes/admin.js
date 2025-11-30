@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const pool = require('../db');
+const pool = require('../db'); // conexão MySQL/MariaDB
 
 // Middleware para checar se o admin está logado
 function verificarAdmin(req, res, next) {
@@ -17,19 +17,12 @@ router.post('/login', async (req, res) => {
 
     try {
         const [rows] = await pool.query('SELECT * FROM administradores WHERE login = ?', [login]);
-
-        if (rows.length === 0) {
-            return res.json({ success: false, message: 'Login ou senha inválidos' });
-        }
+        if (rows.length === 0) return res.json({ success: false, message: 'Login ou senha inválidos' });
 
         const admin = rows[0];
         const senhaCorreta = await bcrypt.compare(senha, admin.senha);
+        if (!senhaCorreta) return res.json({ success: false, message: 'Login ou senha inválidos' });
 
-        if (!senhaCorreta) {
-            return res.json({ success: false, message: 'Login ou senha inválidos' });
-        }
-
-        // Cria sessão
         req.session.adminId = admin.id;
         req.session.adminLogin = admin.login;
 
@@ -49,24 +42,35 @@ router.post('/logout', (req, res) => {
     });
 });
 
-// PESQUISAR CONSULTAS POR CRM E DATA
+// PESQUISAR CONSULTAS POR CRM OU CPF
 router.get('/consultas', verificarAdmin, async (req, res) => {
-    const { crm, data } = req.query;
+    let { crm, cpf, data } = req.query;
 
-    if (!crm) {
-        return res.status(400).json({ success: false, message: 'CRM do médico é obrigatório.' });
-    }
+    if (!crm && !cpf) return res.status(400).json({ success: false, message: 'CRM ou CPF é obrigatório.' });
 
     let query = `
         SELECT c.id, c.data_horario, c.status,
-               p.nome AS paciente_nome, p.cpf AS paciente_cpf,
+               p.id AS paciente_id, p.nome AS paciente_nome, p.cpf AS paciente_cpf,
                m.nome AS medico_nome, m.crm AS medico_crm, m.especialidade
         FROM consultas c
         JOIN pacientes p ON p.id = c.paciente_id
         JOIN medicos m ON m.id = c.medico_id
-        WHERE m.crm = ?
+        WHERE 1=1
     `;
-    const params = [crm];
+    const params = [];
+
+    if (crm) {
+        query += ' AND m.crm = ?';
+        params.push(crm);
+    }
+
+    if (cpf) {
+        // Normaliza CPF do input (remove tudo que não for número)
+        const cpfNumeros = cpf.replace(/\D/g, '');
+        // Normaliza CPF do banco usando REPLACE (remove ., - e espaços)
+        query += " AND REPLACE(REPLACE(REPLACE(p.cpf, '.', ''), '-', ''), ' ', '') = ?";
+        params.push(cpfNumeros);
+    }
 
     if (data) {
         query += ' AND DATE(c.data_horario) = ?';
