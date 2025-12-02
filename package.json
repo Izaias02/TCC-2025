@@ -4,7 +4,7 @@
   "description": "Sistema de agendamento médico - TCC 2025",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node test-planet.js"
   },
   "keywords": ["tcc", "agenda", "medico", "express", "mysql"],
   "author": "Izaias",
