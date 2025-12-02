@@ -9,7 +9,9 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0,
-    ssl: { rejectUnauthorized: true } // SSL obrigatório para PlanetScale
+    ssl: {
+        rejectUnauthorized: true // necessário para PlanetScale
+    }
 });
 
 const promisePool = pool.promise();

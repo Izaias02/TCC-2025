@@ -1,23 +1,23 @@
 // server.js
-require('dotenv').config(); // carregar variáveis de ambiente
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const cors = require('cors');
+const db = require('./db'); // Conexão com PlanetScale/MySQL
 
 // Rotas
 const pacientesRoutes = require('./routes/pacientes');
 const medicosRoutes = require('./routes/medicos');
 const adminRoutes = require('./routes/admin');
-const agendamentosRoutes = require('./routes/agendamentos'); // nova rota para agendamentos e relatórios
+const agendamentosRoutes = require('./routes/agendamentos');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ----- MIDDLEWARE -----
-
 app.use(cors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:5500', // frontend
+    origin: process.env.FRONTEND_URL || 'http://localhost:5500',
     credentials: true
 }));
 
@@ -29,14 +29,13 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 2, // 2 horas
+        maxAge: 1000 * 60 * 60 * 2,
         httpOnly: true,
         sameSite: 'lax',
         secure: false
     }
 }));
 
-// Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ----- ROTAS -----
@@ -60,17 +59,7 @@ app.get('/pagina-paciente', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/telapaciente.html'));
 });
 
-// ----- INICIAR SERVIDOR -----
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em http://localhost:${PORT}`);
-});
-
-
-const express = require('express');
-const db = require('./db'); // seu db.js
-
-const app = express();
-
+// ----- ENDPOINTS DE TESTE -----
 app.get('/test-db', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT NOW() AS now');
@@ -80,5 +69,15 @@ app.get('/test-db', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
+app.get('/test-env', (req, res) => {
+  res.json({
+    DB_HOST: process.env.DB_HOST,
+    DB_USER: process.env.DB_USER,
+    DB_NAME: process.env.DB_NAME
+  });
+});
+
+// ----- INICIAR SERVIDOR -----
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
+});
