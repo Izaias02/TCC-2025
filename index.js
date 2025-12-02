@@ -64,3 +64,21 @@ app.get('/pagina-paciente', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
+
+
+const express = require('express');
+const db = require('./db'); // seu db.js
+
+const app = express();
+
+app.get('/test-db', async (req, res) => {
+  try {
+    const [rows] = await db.query('SELECT NOW() AS now');
+    res.json({ success: true, serverTime: rows[0].now });
+  } catch (err) {
+    res.json({ success: false, error: err.message });
+  }
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => console.log(`Servidor rodando na porta ${port}`));
