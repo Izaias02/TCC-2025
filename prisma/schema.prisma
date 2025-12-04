@@ -8,19 +8,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+///////////////////////
+// TABELAS ORIGINAIS //
+///////////////////////
+
 model Usuario {
   id         Int      @id @default(autoincrement())
   nome       String
   email      String   @unique
   senha      String
-  // Não usar relação com Agendamento ou Consulta
 }
 
 model Medico {
   id            Int    @id @default(autoincrement())
   nome          String
   especialidade String
-  // Não usar relações
 }
 
 model Consulta {
@@ -28,7 +30,6 @@ model Consulta {
   data      DateTime
   usuarioId Int
   medicoId  Int
-  // Não usar relações
 }
 
 model Agendamento {
@@ -45,4 +46,51 @@ model Disponibilidade {
   medicoId  Int
   dia       String
   horario   String
+}
+
+//////////////////////////////
+// TABELAS NOVAS QUE PEDIU //
+//////////////////////////////
+
+model administradores {
+  id     Int    @id @default(autoincrement())
+  login  String
+  senha  String
+}
+
+model medicos {
+  id        Int     @id @default(autoincrement())
+  nome      String
+  email     String  @unique
+  senha     String
+  crm       String?
+  consultas consultas[]
+}
+
+model pacientes {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  email     String    @unique
+  senha     String
+  telefone  String?
+  consultas consultas[]
+}
+
+model consultas {
+  id           Int      @id @default(autoincrement())
+  paciente_id  Int
+  medico_id    Int
+  data_horario DateTime
+  status       String   @default("agendada")
+
+  medico    medicos   @relation(fields: [medico_id], references: [id])
+  paciente  pacientes @relation(fields: [paciente_id], references: [id])
+}
+
+model relatorios_medicos {
+  id          Int      @id @default(autoincrement())
+  paciente_id Int
+  medico_id   Int
+  texto       String
+  data        DateTime @default(now())
 }
