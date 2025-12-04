@@ -1,0 +1,48 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id         Int      @id @default(autoincrement())
+  nome       String
+  email      String   @unique
+  senha      String
+  // Não usar relação com Agendamento ou Consulta
+}
+
+model Medico {
+  id            Int    @id @default(autoincrement())
+  nome          String
+  especialidade String
+  // Não usar relações
+}
+
+model Consulta {
+  id        Int      @id @default(autoincrement())
+  data      DateTime
+  usuarioId Int
+  medicoId  Int
+  // Não usar relações
+}
+
+model Agendamento {
+  id         Int      @id @default(autoincrement())
+  usuarioId  Int
+  medicoId   Int
+  consultaId Int
+  status     String   @default("pendente")
+  criadoEm   DateTime @default(now())
+}
+
+model Disponibilidade {
+  id        Int      @id @default(autoincrement())
+  medicoId  Int
+  dia       String
+  horario   String
+}
